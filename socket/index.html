@@ -10,6 +10,9 @@
             <button>send</button>
         </form>
 
+        <!-- 아래의 파일은 실제 유저가 추가한 것이 아니다.
+            서버에 socket io서버가 실행될 때 로컬에 자동으로 추가 하게 된다.
+         -->
         <script src="/socket.io/socket.io.js"></script>
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
         <script>
@@ -18,6 +21,8 @@
                 // 아래 메서드로 app.js의 io.on('connection') 이벤트가 발생하게 된다.
                 // 모든것은 on과 emit의 관계이다. on은 대기하는 쪽이고 emit은 발생시키는 쪽이다.
                 // 양방향으로 연결시켜 놓았다고 보면 된다.
+
+                // 아무 인자를 넣지 않으면 루트 경로인 / 의 namespace가 적용된다.
                 const socket = io();
 
                 // form 전송시 input의 값으로 socket 이벤트(chat message)를 실행(emit) 시킨다.

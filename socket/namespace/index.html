@@ -1,0 +1,21 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <script src='/socket.io/socket.io.js'></script>
+        <script>
+            function namespace(nsp) {
+                const namespace = io(`/namespace${nsp}`);
+
+                // 서버에서 news라는 이벤트를 보낼시 콘솔에 data.hello를 출력
+                namespace.on('news', (data) => {
+                    console.log(data.hello);
+                });
+            }
+        </script>
+        <!-- 누를때마다 방에 계속 중복으로 진입하는 구조이다. -->
+        <button onclick="namespace(1)">namespace1</button>
+        <button onclick="namespace(2)">namespace2</button>
+    </body>
+</html>

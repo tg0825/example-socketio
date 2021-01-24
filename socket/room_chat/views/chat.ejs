@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .wrap {
+            height: 100%;
+        }
+
+        body {
+            font: 14px Helvetica, Arial;
+        }
+
+        form {
+            background: #000;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        form input {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- 채팅방 선택 -->
+        <select>
+            <option value="Room1">Room1</option>
+            <option value="Room2">Room2</option>
+        </select>
+
+        <!-- 메세지 -->
+        <ul id="messages"></ul>
+
+        <form action="">
+            <input id="m" autocomplete="off" />
+        </form>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        $(() => {
+            // 채팅방 선택
+            $('select').change(() => {
+                socket.emit('leaveRoom', num, name);
+                num++;
+                num = num % 2;
+                socket.emit('joinRoom', num, name);
+                $('#messages').html('');
+            });
+
+            $('form').submit((e) => {
+                e.preventDefault();
+                socket.emit('chat message', num, name, $('#m').val());
+                $('#m').val('');
+            });
+
+            let name = '';
+            while (!name.trim()) {
+                name = prompt('당신의 이름은 무엇입니까?');
+            }
+            const socket = io();
+            let room = ['room1', 'room2'];
+            let num = 0;
+
+            // joinroom 소켓 이벤트 발송
+            socket.emit('joinRoom', num, name);
+
+            socket.on('test', (name, msg) => {
+                console.log('test');
+            });
+
+            socket.on('chat message', (name, msg) => {
+                $('#messages').append($('<li>').text(name + ' : ' + msg));
+            });
+
+            // 입장 이벤트 (서버에서 발송)
+            socket.on('joinChatRoom', (num, name) => {
+                console.log('join');
+                $('#messages').append($('<li>').text(name + ' 님이 ' + room[num] + '방에 접속했습니다.  :) '));
+            });
+
+            // 이탈 이벤트 (서버에서 발송)
+            socket.on('leaveChatRoom', (name, msg) => {
+                console.log('leave');
+                $('#messages').append($('<li>').text(name + ' 님이 ' + room[num] + '방을 떠났습니다. :( '));
+            });
+        });
+    </script>
+</body>
+
+</html>
