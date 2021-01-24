@@ -1,0 +1,37 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <ul id="messages"></ul>
+
+        <form action="">
+            <input id="m" type="text">
+            <button>send</button>
+        </form>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script>
+            $(()=>{
+                // 위 socket.io.js를 호출하면서 io 함수가 존재하게 된다.
+                // 아래 메서드로 app.js의 io.on('connection') 이벤트가 발생하게 된다.
+                // 모든것은 on과 emit의 관계이다. on은 대기하는 쪽이고 emit은 발생시키는 쪽이다.
+                // 양방향으로 연결시켜 놓았다고 보면 된다.
+                const socket = io();
+
+                // form 전송시 input의 값으로 socket 이벤트(chat message)를 실행(emit) 시킨다.
+                $('form').submit((e)=>{
+                    e.preventDefault();
+                    socket.emit('chat message', $('#m').val());
+                    $('#m').val('');
+                });
+
+                // 소켓 chat message 이벤트를 대기한다.
+                socket.on('chat message', (msg) => {
+                    $('#messages').append($('<li>').text(msg));
+                });
+            });
+        </script>
+    </body>
+</html>
