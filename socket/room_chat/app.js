@@ -9,7 +9,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // 채팅방 종류
-let room = ['room1', 'room2'];
+let room = ['room1', 'room2', 'room3'];
 let a = 0;
 
 // / 일 경우 chat파일 호출
@@ -21,6 +21,12 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('유저가 접속했습니다.');
 
+    // 현재 방 가져오기
+    socket.on('onGetRoom', (data) => {
+        console.log(io.sockets.adapter.rooms);
+        // socket.emit('getRoom', rooms);
+    });
+
     // 소켓 연동 종료 이벤트
     socket.on('disconnect', () => {
         console.log('유저가 접속을 종료 했습니다.');
@@ -29,10 +35,13 @@ io.on('connection', (socket) => {
     // socket 참여 이벤트 핸들러 (이 이벤트 호출은 클라이언트에서 한다)
     socket.on('joinRoom', (num, name) => {
         a = num;
+        console.log(num);
         console.log(`[SERVER] 참여 ${num}방 ${name}님`);
         socket.join(room[num]);
         // 특정 룸의 이벤트를 호출한다. (클라이언트에 이벤트를 발송한다.)
-        io.to(room[num]).emit('joinChatRoom', num, name);
+        // io는 일종의 아파트의 관리사무실이라고 보면 된다.
+        // 관리사무실에서 특정 방에 방송을 하는 것이다.
+        io.to(room[num]).emit('joinChatRoom', name, num);
         
     });
 
@@ -42,7 +51,7 @@ io.on('connection', (socket) => {
         // socket에 leave
         socket.leave(room[num]);
         // 특정 룸의 이탈 이벤트 (leaveRoom)를 클라이언트로 송출한다.
-        io.to(room[num]).emit('leaveChatRoom', num ,name);
+        io.to(room[num]).emit('leaveChatRoom', name, num);
     });
 
     // chat message 이벤트 핸들러
