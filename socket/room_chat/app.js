@@ -17,6 +17,7 @@ app.get('/', (req, res) => {
     res.render('chat');
 }); 
 
+
 // default에 접근시
 io.on('connection', (socket) => {
     // 현재 방 가져오기
