@@ -55,8 +55,7 @@
         <!-- 채팅방 선택 -->
         <div>
             <select>
-                <option value="1">Room1</option>
-                <option value="2">Room2</option>
+                <option value="0">room0</option>
             </select>
 
             <button class="add-room">방 추가</button>
@@ -75,49 +74,57 @@
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         $(() => {
-            let name = 'ted';
-            // while (!name.trim()) {
-            //     name = prompt('당신의 이름은 무엇입니까?');
-            // }
+            let name = '';
+
+            while (!name.trim()) {
+                name = prompt('당신의 이름은 무엇입니까?');
+            }
+
             // 방 이름 prefix
             let room = 'room';
             // 현재 방 번호
-            let num = 1;
-
-            // 방 추가
-            $('.add-room').on('click', () => {
-                var length = $('select').children('option').length;
-                length = length + 1;
-                $("select").append(new Option("room" + length, length));
-            });
-
-            // 방 선택
-            $('select').change((e) => {
-                socket.emit('leaveRoom', num, name);
-                num = e.target.value;
-                socket.emit('joinRoom', num, name);
-                $('#messages').html('');
-                console.log('현재방', num);
-            });
-
-            // 메시지 전송
-            $('form').submit((e) => {
-                e.preventDefault();
-                socket.emit('chat message', num, name, $('#m').val());
-                $('#m').val('');
-            });
+            let num = 0;
 
             // init socket
             const socket = io();
 
             // joinroom 소켓 이벤트 발송
             // 시작과 동시에 0번 방 진입
-            socket.emit('joinRoom', num, name);
+            socket.emit('joinRoom', 'room' + num, name);
 
-            socket.emit('onGetRoom');
+            // 방 추가
+            $('.add-room').on('click', () => {
+                var length = $('select').children('option').length;
+                length = length + 1;
+                $("select").append(new Option("room" + length, length));
+                socket.emit('create', 'room' + length);
+            });
+
+            // 방 선택
+            $('select').change((e) => {
+                socket.emit('leaveRoom', 'room' + num, name);
+                num = e.target.value;
+                console.log('join');
+                socket.emit('joinRoom', 'room' + num, name);
+                $('#messages').html('');
+            });
+
+            // 메시지 전송
+            $('form').submit((e) => {
+                e.preventDefault();
+                socket.emit('chat message', 'room' + num, name, $('#m').val());
+                $('#m').val('');
+            });
 
             socket.on('getRoom', (room) => {
                 console.log(room);
+            });
+
+            socket.on('setRooms', (rooms) => {
+                $("select").find('option').remove();
+                rooms.forEach((v, i)=>{
+                    $("select").append(new Option("room" + i, i));
+                });
             });
 
             socket.on('chat message', (name, msg) => {
@@ -126,12 +133,12 @@
 
             // 입장 이벤트 (서버에서 발송)
             socket.on('joinChatRoom', (name, num) => {
-                $('#messages').append($('<li>').text(name + ' 님이 ' + room + num + '방에 접속했습니다.  :) '));
+                $('#messages').append($('<li>').text(name + ' 님이 ' + num + '방에 접속했습니다.  :) '));
             });
 
             // 이탈 이벤트 (서버에서 발송)
             socket.on('leaveChatRoom', (name, num) => {
-                $('#messages').append($('<li>').text(name + ' 님이 ' + room + num + '방을 떠났습니다. :( '));
+                $('#messages').append($('<li>').text(name + ' 님이 ' + num + '방을 떠났습니다. :( '));
             });
         });
     </script>
